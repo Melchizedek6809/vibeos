@@ -1,6 +1,7 @@
 #include "include/stdint.h"
 #include "include/stddef.h"
 #include "include/stdio.h"
+#include "include/string.h"
 #include "kernel.h"
 #include "vga.h"
 #include "serial.h"
@@ -39,6 +40,53 @@ void kernel_main(uint32_t multiboot_magic, uint32_t multiboot_addr) {
     puts(buffer);
     snprintf(buffer, sizeof(buffer), "Format string length: %d\n", len);
     puts(buffer);
+    
+    /* Test string utility functions */
+    puts("\n==== Testing string functions ====\n");
+    
+    /* Test strlen and strnlen */
+    const char* test_str = "This is a test string";
+    snprintf(buffer, sizeof(buffer), "strlen(\"%s\") = %d\n", test_str, strlen(test_str));
+    puts(buffer);
+    snprintf(buffer, sizeof(buffer), "strnlen(\"%s\", 10) = %d\n", test_str, strnlen(test_str, 10));
+    puts(buffer);
+    
+    /* Test string copy */
+    char dest[64];
+    memset(dest, 0, sizeof(dest));
+    strcpy(dest, "Hello");
+    strncpy(dest + 5, " World!", 8);
+    snprintf(buffer, sizeof(buffer), "After strcpy/strncpy: \"%s\"\n", dest);
+    puts(buffer);
+    
+    /* Test string comparison */
+    const char* str1 = "apple";
+    const char* str2 = "apple";
+    const char* str3 = "banana";
+    snprintf(buffer, sizeof(buffer), "strcmp(\"%s\", \"%s\") = %d\n", str1, str2, strcmp(str1, str2));
+    puts(buffer);
+    snprintf(buffer, sizeof(buffer), "strcmp(\"%s\", \"%s\") = %d\n", str1, str3, strcmp(str1, str3));
+    puts(buffer);
+    snprintf(buffer, sizeof(buffer), "strncmp(\"%s\", \"%s\", 3) = %d\n", str1, str3, strncmp(str1, str3, 3));
+    puts(buffer);
+    
+    /* Test memory functions */
+    char mem1[16];
+    char mem2[16];
+    
+    memset(mem1, 'A', sizeof(mem1));
+    mem1[15] = 0;
+    snprintf(buffer, sizeof(buffer), "After memset: \"%s\"\n", mem1);
+    puts(buffer);
+    
+    memcpy(mem2, mem1, sizeof(mem2));
+    mem2[7] = 0;
+    snprintf(buffer, sizeof(buffer), "After memcpy: \"%s\"\n", mem2);
+    puts(buffer);
+    
+    snprintf(buffer, sizeof(buffer), "memcmp result: %d\n", memcmp(mem1, mem2, 7));
+    puts(buffer);
+    
     puts("================================\n");
     
     /* Adding a small delay and extra output to make sure we see everything */

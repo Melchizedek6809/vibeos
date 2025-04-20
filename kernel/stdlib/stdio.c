@@ -1,91 +1,15 @@
-#include "include/stdio.h"
-#include "include/stddef.h"
-#include "include/stdint.h"
-#include "include/stdarg.h"
-#include "vga.h"
-#include "serial.h"
+#include "../include/stdio.h"
+#include "../include/stddef.h"
+#include "../include/stdint.h"
+#include "../include/stdarg.h"
+#include "../include/string.h"
+#include "../vga.h"
+#include "../serial.h"
 
 /* Write a string to both terminal and serial outputs */
 void puts(const char* str) {
     terminal_write(str);
     serial_write_string(str);
-}
-
-/* Internal function to reverse a string in place */
-static void reverse_str(char* start, char* end) {
-    char temp;
-    while (start < end) {
-        temp = *start;
-        *start = *end;
-        *end = temp;
-        start++;
-        end--;
-    }
-}
-
-/* Convert integer to string and return length */
-static int itoa(int32_t value, char* str, int base) {
-    int i = 0;
-    int is_negative = 0;
-    
-    /* Handle 0 explicitly */
-    if (value == 0) {
-        str[i++] = '0';
-        str[i] = '\0';
-        return i;
-    }
-    
-    /* Handle negative numbers for base 10 */
-    if (value < 0 && base == 10) {
-        is_negative = 1;
-        value = -value;
-    }
-    
-    /* Process individual digits */
-    while (value != 0) {
-        int remainder = value % base;
-        str[i++] = (remainder < 10) ? remainder + '0' : remainder + 'a' - 10;
-        value /= base;
-    }
-    
-    /* Add negative sign if needed */
-    if (is_negative)
-        str[i++] = '-';
-    
-    /* Null terminate the string */
-    str[i] = '\0';
-    
-    /* Reverse the string */
-    reverse_str(str, &str[i - 1]);
-    
-    return i;
-}
-
-/* Convert unsigned integer to string and return length */
-static int utoa(uint32_t value, char* str, int base) {
-    int i = 0;
-    
-    /* Handle 0 explicitly */
-    if (value == 0) {
-        str[i++] = '0';
-        str[i] = '\0';
-        return i;
-    }
-    
-    /* Process individual digits */
-    while (value != 0) {
-        int remainder = value % base;
-        str[i++] = (remainder < 10) ? remainder + '0' : remainder + 'a' - 10;
-        value /= base;
-    }
-    
-    /* Null terminate the string */
-    str[i] = '\0';
-    
-    /* Reverse the string */
-    reverse_str(str, &str[i - 1]);
-    
-    return i;
 }
 
 /* Format a string and store it in the buffer */

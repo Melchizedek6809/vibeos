@@ -20,12 +20,17 @@ QEMUFLAGS = -kernel build/kernel.bin \
 
 # Directories
 SRC_DIR = kernel
+STDLIB_DIR = kernel/stdlib
 BUILD_DIR = build
 
 # Source files
 C_SOURCES = $(wildcard $(SRC_DIR)/*.c)
+STDLIB_SOURCES = $(wildcard $(STDLIB_DIR)/*.c)
 ASM_SOURCES = $(wildcard $(SRC_DIR)/*.S)
+
+# Object files
 OBJECTS = $(C_SOURCES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
+OBJECTS += $(STDLIB_SOURCES:$(STDLIB_DIR)/%.c=$(BUILD_DIR)/stdlib_%.o)
 OBJECTS += $(ASM_SOURCES:$(SRC_DIR)/%.S=$(BUILD_DIR)/%.o)
 
 # Target files
@@ -39,8 +44,13 @@ all: prepare $(KERNEL)
 prepare:
 	@mkdir -p $(BUILD_DIR)
 
-# Compile C files
+# Compile C files from main kernel directory
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@echo "Compiling $<"
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile C files from stdlib directory
+$(BUILD_DIR)/stdlib_%.o: $(STDLIB_DIR)/%.c
 	@echo "Compiling $<"
 	$(CC) $(CFLAGS) -c $< -o $@
 

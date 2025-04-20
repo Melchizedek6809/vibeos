@@ -22,12 +22,16 @@ kernel/
 ├── serial.c/h         # Serial port communication
 ├── vga.c/h            # VGA text mode display
 ├── util.c/h           # Utility functions
-├── stdio.c            # Standard I/O functionality
 ├── linker.ld          # Linker script for the kernel
-└── include/           # Custom standard headers
-    ├── stdint.h       # Integer type definitions
-    ├── stddef.h       # Common type definitions
-    └── stdarg.h       # Variable argument support
+├── include/           # Custom standard headers
+│   ├── stdint.h       # Integer type definitions
+│   ├── stddef.h       # Common type definitions
+│   ├── stdarg.h       # Variable argument support
+│   ├── stdio.h        # Standard I/O definitions
+│   └── string.h       # String manipulation definitions
+└── stdlib/            # Standard library implementations
+    ├── stdio.c        # Standard I/O functionality
+    └── string.c       # String manipulation functions
 ```
 
 ## Features
@@ -37,6 +41,7 @@ kernel/
 - **Dual Output**: All kernel messages are displayed on both VGA console and serial port
 - **Custom Standard Library**: Independent implementation of common C headers
 - **Formatted Output**: Support for formatted string output with snprintf
+- **String Utilities**: Complete suite of string and memory manipulation functions
 
 ## Building
 
@@ -70,8 +75,10 @@ The kernel currently provides:
 - Basic terminal driver for text output using VGA mode
 - Serial port driver for debugging output
 - Helper functions for I/O port access
-- Minimal standard library implementation
-- Simple formatted string output through snprintf
+- Minimal standard library implementation:
+  - String functions (strlen, strcpy, strcmp, etc.)
+  - Memory functions (memcpy, memmove, memset, etc.)
+  - Formatted output through snprintf
 
 ## Future Improvements
 
