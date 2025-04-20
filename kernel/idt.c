@@ -1,17 +1,23 @@
 #include "include/idt.h"
 #include <stdint.h>
-#include "serial.h"
+#include "include/stdio.h"
 #include "util.h"
 #include <stddef.h>
 #include "include/string.h"
-#include "include/stdio.h"
 #include "io.h"
+#include "pic.h"
 
 /* The IDT entries */
 static idt_entry_t idt_entries[256];
 
 /* The IDTR pointer */
 static idtr_t idtr;
+
+/* Handle timer interrupts without printing debug messages */
+void timer_handler(registers_t* regs) {
+    (void)regs; /* Avoid unused parameter warning */
+    /* We don't need to do anything here, just acknowledge the interrupt */
+}
 
 /* External references to our ISR handlers defined in assembly */
 extern void isr0(void);
@@ -91,6 +97,9 @@ void idt_init(void) {
     /* Clear the IDT */
     memset(&idt_entries, 0, sizeof(idt_entries));
 
+    /* Remap PIC to avoid conflicts with CPU exceptions */
+    pic_remap(32, 40);
+
     /* Set up ISR entries */
     idt_set_gate(0, (uint32_t)isr0, 0x08, 0x8E);
     idt_set_gate(1, (uint32_t)isr1, 0x08, 0x8E);
@@ -145,6 +154,12 @@ void idt_init(void) {
 
     /* Load the IDT */
     idt_load((uint32_t)&idtr);
+    
+    /* Register timer handler to avoid spam */
+    register_interrupt_handler(32, timer_handler);
+    
+    /* Enable keyboard IRQ */
+    pic_enable_irq(1);
     
     printf("IDT initialized\n");
 } 

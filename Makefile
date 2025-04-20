@@ -32,7 +32,9 @@ C_SOURCES = $(SRC_DIR)/idt.c \
             $(SRC_DIR)/kernel.c \
             $(SRC_DIR)/serial.c \
             $(SRC_DIR)/util.c \
-            $(SRC_DIR)/vga.c
+            $(SRC_DIR)/vga.c \
+            $(SRC_DIR)/keyboard.c \
+            $(SRC_DIR)/pic.c
 
 STDLIB_SOURCES = $(STDLIB_DIR)/stdio.c \
                  $(STDLIB_DIR)/string.c

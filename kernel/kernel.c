@@ -7,6 +7,7 @@
 #include "vga.h"
 #include "serial.h"
 #include "util.h"
+#include "keyboard.h"
 
 /* Helper macro to check multiboot magic value */
 #define CHECK_MULTIBOOT_MAGIC(x) ((x) == MULTIBOOT_MAGIC)
@@ -65,13 +66,16 @@ void kernel_main(uint32_t multiboot_magic, uint32_t multiboot_addr) {
     /* Register a custom handler for the divide by zero exception */
     register_interrupt_handler(0, test_interrupt_handler);
     
-    /* Adding a small delay and extra output to make sure we see everything */
-    delay(100);
-    printf("Kernel is now halting...\n");
+    /* Initialize the PS/2 keyboard */
+    keyboard_init();
     
-    /* This should prevent infinite reboot loops */
+    /* Enable interrupts so keyboard can generate events */
+    asm volatile ("sti");
+    
+    printf("\n\033[1;36mKeyboard ready! Start typing...\033[0m\n");
+    
+    /* Main kernel loop - halt when idle but wake on interrupts */
     while (1) {
-        asm volatile ("cli");  /* Disable interrupts */
-        asm volatile ("hlt");  /* Halt CPU */
+        asm volatile ("hlt");
     }
 } 
