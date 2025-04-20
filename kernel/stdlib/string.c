@@ -205,4 +205,44 @@ int utoa(uint32_t value, char* str, int base) {
     reverse_str(str, &str[i - 1]);
     
     return i;
+}
+
+/* Convert a string to an integer */
+int atoi(const char* str) {
+    int result = 0;
+    int sign = 1;
+    
+    /* Skip leading whitespace */
+    while (*str == ' ' || *str == '\t' || *str == '\n' || *str == '\r') {
+        str++;
+    }
+    
+    /* Handle sign */
+    if (*str == '-') {
+        sign = -1;
+        str++;
+    } else if (*str == '+') {
+        str++;
+    }
+    
+    /* Convert digits */
+    while (*str >= '0' && *str <= '9') {
+        result = result * 10 + (*str - '0');
+        str++;
+    }
+    
+    return sign * result;
+}
+
+/* Find the first occurrence of a character in a string */
+char* strchr(const char* str, int c) {
+    while (*str != '\0') {
+        if (*str == (char)c) {
+            return (char*)str;
+        }
+        str++;
+    }
+    
+    /* Return NULL if we didn't find the character */
+    return NULL;
 } 

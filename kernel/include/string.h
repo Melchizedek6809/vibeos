@@ -29,4 +29,14 @@ int utoa(uint32_t value, char* str, int base);
 /* String manipulation helper */
 void reverse_str(char* start, char* end);
 
+/* String tokenization */
+char* strtok(char* str, const char* delimiters);
+
+/* String search functions */
+char* strchr(const char* str, int c);
+char* strrchr(const char* str, int c);
+
+/* String to number conversion */
+int atoi(const char* str);
+
 #endif /* _VIBEOS_STRING_H */ 

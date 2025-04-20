@@ -4,6 +4,7 @@
 #include "util.h"
 #include <stddef.h>
 #include "include/string.h"
+#include "include/stdio.h"
 #include "io.h"
 
 /* The IDT entries */
@@ -145,5 +146,5 @@ void idt_init(void) {
     /* Load the IDT */
     idt_load((uint32_t)&idtr);
     
-    serial_printf("IDT initialized\n");
+    printf("IDT initialized\n");
 } 

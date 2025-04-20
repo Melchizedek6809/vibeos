@@ -12,6 +12,22 @@ void puts(const char* str) {
     serial_write_string(str);
 }
 
+/* Format a string and output to both terminal and serial */
+int printf(const char* format, ...) {
+    char buffer[256];
+    va_list args;
+    
+    va_start(args, format);
+    int result = vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    
+    /* Output to both VGA and serial */
+    terminal_write(buffer);
+    serial_write_string(buffer);
+    
+    return result;
+}
+
 /* Format a string and store it in the buffer */
 int snprintf(char* buffer, size_t size, const char* format, ...) {
     va_list args;

@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "include/idt.h"
+#include "include/stdio.h"
 #include "serial.h"
 #include "vga.h"
 
@@ -51,30 +52,30 @@ void register_interrupt_handler(uint8_t n, isr_handler_t handler) {
  * This gets called from our assembly interrupt handler stub */
 void isr_handler(registers_t regs) {
     /* For debugging: Print the interrupt that occurred */
-    vga_printf("Received interrupt: %d", regs.int_no);
+    printf("Received interrupt: %d", regs.int_no);
     
     /* If it's an exception (0-31), print more detail */
     if (regs.int_no < 32) {
-        vga_printf(" - %s Exception", exception_messages[regs.int_no]);
+        printf(" - %s Exception", exception_messages[regs.int_no]);
         
         /* For some exceptions, print the error code too */
         if (regs.int_no == 14) { /* Page fault */
-            vga_printf("\nError Code: %x", regs.err_code);
+            printf("\nError Code: %x", regs.err_code);
             /* Bit 0: Present - 0=non-present page, 1=protection violation
                Bit 1: Write - 0=read, 1=write
                Bit 2: User - 0=supervisor, 1=user
                Bit 3: Reserved write - 0=not reserved bit violation, 1=reserved bit violation
                Bit 4: Instruction Fetch - 0=not instruction fetch, 1=instruction fetch */
-            vga_printf("\nFault was caused by a %s", (regs.err_code & 0x1) ? "page-level protection violation" : "non-present page");
-            vga_printf("\nAccess type: %s", (regs.err_code & 0x2) ? "write" : "read");
-            vga_printf("\nProcessor mode: %s", (regs.err_code & 0x4) ? "user-mode" : "supervisor-mode");
+            printf("\nFault was caused by a %s", (regs.err_code & 0x1) ? "page-level protection violation" : "non-present page");
+            printf("\nAccess type: %s", (regs.err_code & 0x2) ? "write" : "read");
+            printf("\nProcessor mode: %s", (regs.err_code & 0x4) ? "user-mode" : "supervisor-mode");
         }
         
         /* Debug output to serial port as well */
-        serial_printf("EXCEPTION: %s (INT %d)\n", exception_messages[regs.int_no], regs.int_no);
+        printf("\nEXCEPTION: %s (INT %d)\n", exception_messages[regs.int_no], regs.int_no);
         
         /* Serious error - halt the system */
-        vga_printf("\nSystem Halted!");
+        printf("\nSystem Halted!");
         for(;;); /* Infinite loop */
     }
     
@@ -84,6 +85,6 @@ void isr_handler(registers_t regs) {
         handler(&regs);
     } else if (regs.int_no >= 32) {
         /* If no handler for non-exception interrupt, just acknowledge it */
-        serial_printf("Unhandled interrupt: %d\n", regs.int_no);
+        printf("Unhandled interrupt: %d\n", regs.int_no);
     }
 } 
