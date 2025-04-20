@@ -4,7 +4,8 @@ QEMU = qemu-system-i386
 
 # Compiler and linker flags
 CFLAGS = -Wall -Wextra -O0 -g -ffreestanding -m32 \
-         -fno-stack-protector -fno-pie -no-pie
+         -fno-stack-protector -fno-pie -no-pie \
+         -nostdinc -Ikernel/include
 LDFLAGS = -m elf_i386 -T kernel/linker.ld -nostdlib
 
 # QEMU configuration with multiboot support

@@ -1,8 +1,8 @@
 #ifndef KERNEL_H
 #define KERNEL_H
 
-#include <stdint.h>
-#include <stddef.h>
+#include "include/stdint.h"
+#include "include/stddef.h"
 
 /* Multiboot header magic values */
 #define MULTIBOOT_MAGIC 0x1BADB002

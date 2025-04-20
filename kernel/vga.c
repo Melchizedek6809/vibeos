@@ -1,5 +1,5 @@
-#include <stdint.h>
-#include <stddef.h>
+#include "include/stdint.h"
+#include "include/stddef.h"
 #include "vga.h"
 
 /* Hardware text mode color constants */

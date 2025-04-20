@@ -1,3 +1,4 @@
+#include "include/stddef.h"
 #include "util.h"
 #include "vga.h"
 #include "serial.h"
