@@ -1,0 +1,39 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# VibeOS - LLM-Assisted OS Development
+
+## Project Description
+VibeOS is an educational project aimed at building a small Unix-like operating system kernel with the assistance of LLM tools. The goal is to explore OS development concepts in a structured, modular way while leveraging AI assistance for implementation and problem-solving.
+
+This project serves as both a learning platform for OS fundamentals and an experiment in LLM-assisted software development for complex low-level systems.
+
+## General Guidelines
+
+### Development Approach
+- **Incremental Progress**: Build the system piece by piece, starting with the basics
+- **Learning-Focused**: Prioritize clear, well-commented code over optimization
+- **LLM Collaboration**: Use AI tools to help design, implement, and debug components
+- **Hands-On Learning**: Implement core OS concepts from scratch rather than using libraries
+
+### Architecture Guidelines
+- **32-bit x86**: Target the i386 architecture for simplicity and educational value
+- **Modular Design**: Separate functionality into cohesive, well-defined modules
+- **Unix Inspiration**: Follow Unix-like design principles where appropriate
+- **Self-Contained**: Implement custom versions of standard libraries rather than using existing ones
+
+### Code Style
+- **Clear Organization**: Maintain a consistent, logical file structure
+- **Descriptive Naming**: Use explicit names for functions, variables, and constants
+- **Comprehensive Comments**: Document the purpose of functions and complex logic
+- **Consistent Styling**: Follow established formatting patterns throughout the codebase
+
+### Implementation Priorities
+1. **Core Kernel**: Basic initialization, I/O, and terminal functionality
+2. **Memory Management**: Paging, allocation, and virtual memory
+3. **Process Management**: Task scheduling and execution
+4. **File Systems**: Basic file operations and storage
+5. **User Space**: Applications and system calls
+6. **Networking**: Basic communication capabilities

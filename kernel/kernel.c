@@ -1,5 +1,6 @@
 #include "include/stdint.h"
 #include "include/stddef.h"
+#include "include/stdio.h"
 #include "kernel.h"
 #include "vga.h"
 #include "serial.h"
@@ -27,7 +28,18 @@ void kernel_main(uint32_t multiboot_magic, uint32_t multiboot_addr) {
     /* Basic hello world output to both console and serial */
     puts("Hello, World!\n");
     puts("Kernel booted successfully\n");
-    puts("========================\n");
+    
+    /* Test our snprintf implementation */
+    char buffer[128];
+    int len = snprintf(buffer, sizeof(buffer), 
+                      "Testing snprintf: int=%d, hex=0x%x, char=%c, str=%s, ptr=%p\n",
+                      12345, 0xABCD, 'X', "test string", (void*)0xDEADBEEF);
+    
+    puts("==== Testing stdio functions ====\n");
+    puts(buffer);
+    snprintf(buffer, sizeof(buffer), "Format string length: %d\n", len);
+    puts(buffer);
+    puts("================================\n");
     
     /* Adding a small delay and extra output to make sure we see everything */
     delay(100);
