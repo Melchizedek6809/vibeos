@@ -72,7 +72,7 @@ iso: all
 	@cp $(KERNEL) $(BUILD_DIR)/iso/boot/
 	@echo "set timeout=0" > $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	@echo "set default=0" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
-	@echo "menuentry \"VIbeOS\" {" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
+	@echo "menuentry \"VibeOS\" {" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	@echo "  multiboot /boot/kernel.bin" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	@echo "  boot" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	@echo "}" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg

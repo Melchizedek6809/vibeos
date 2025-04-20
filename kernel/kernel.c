@@ -155,8 +155,8 @@ void kernel_main(uint32_t multiboot_magic, uint32_t multiboot_addr) {
     serial_init();
     
     /* Basic headers for both outputs */
-    terminal_write("=== Welcome to VIbeOS ===\n");
-    serial_write_string("=== Welcome to VIbeOS ===\n");
+    terminal_write("=== Welcome to VibeOS ===\n");
+    serial_write_string("=== Welcome to VibeOS ===\n");
     
     /* Check multiboot magic but don't fail if it's wrong */
     if (!CHECK_MULTIBOOT_MAGIC(multiboot_magic)) {

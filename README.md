@@ -1,4 +1,4 @@
-# VIbeOS
+# VibeOS
 
 A very simple operating system kernel. This is a minimal example that demonstrates:
 
