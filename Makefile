@@ -1,4 +1,5 @@
 CC = gcc
+AS = gcc
 LD = ld
 QEMU = qemu-system-i386
 
@@ -6,6 +7,7 @@ QEMU = qemu-system-i386
 CFLAGS = -Wall -Wextra -O0 -g -ffreestanding -m32 \
          -fno-stack-protector -fno-pie -no-pie \
          -nostdinc -Ikernel/include
+ASFLAGS = -m32 -nostdlib
 LDFLAGS = -m elf_i386 -T kernel/linker.ld -nostdlib
 
 # QEMU configuration with multiboot support
@@ -24,17 +26,28 @@ STDLIB_DIR = kernel/stdlib
 BUILD_DIR = build
 
 # Source files
-C_SOURCES = $(wildcard $(SRC_DIR)/*.c)
-STDLIB_SOURCES = $(wildcard $(STDLIB_DIR)/*.c)
-ASM_SOURCES = $(wildcard $(SRC_DIR)/*.S)
+C_SOURCES = $(SRC_DIR)/idt.c \
+            $(SRC_DIR)/io.c \
+            $(SRC_DIR)/isr.c \
+            $(SRC_DIR)/kernel.c \
+            $(SRC_DIR)/serial.c \
+            $(SRC_DIR)/util.c \
+            $(SRC_DIR)/vga.c
+
+STDLIB_SOURCES = $(STDLIB_DIR)/stdio.c \
+                 $(STDLIB_DIR)/string.c
+
+ASM_SOURCES = $(SRC_DIR)/boot.S \
+              $(SRC_DIR)/interrupts.S
 
 # Object files
-OBJECTS = $(C_SOURCES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
-OBJECTS += $(STDLIB_SOURCES:$(STDLIB_DIR)/%.c=$(BUILD_DIR)/stdlib_%.o)
-OBJECTS += $(ASM_SOURCES:$(SRC_DIR)/%.S=$(BUILD_DIR)/%.o)
+OBJECTS = $(C_SOURCES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o) \
+          $(STDLIB_SOURCES:$(STDLIB_DIR)/%.c=$(BUILD_DIR)/stdlib_%.o) \
+          $(ASM_SOURCES:$(SRC_DIR)/%.S=$(BUILD_DIR)/%.o)
 
 # Target files
 KERNEL = $(BUILD_DIR)/kernel.bin
+KERNEL_RAW = $(BUILD_DIR)/kernel.raw
 
 .PHONY: all clean run debug iso
 
@@ -57,14 +70,14 @@ $(BUILD_DIR)/stdlib_%.o: $(STDLIB_DIR)/%.c
 # Assemble assembly files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
 	@echo "Assembling $<"
-	$(CC) $(CFLAGS) -c -x assembler-with-cpp $< -o $@
+	$(AS) $(ASFLAGS) -c $< -o $@
 
 # Link the kernel
 $(KERNEL): $(OBJECTS)
 	@echo "Linking kernel"
 	$(LD) $(LDFLAGS) $(OBJECTS) -o $@
 	@echo "Creating a binary copy"
-	objcopy -O binary $(KERNEL) $(BUILD_DIR)/kernel.raw
+	objcopy -O binary $(KERNEL) $(KERNEL_RAW)
 
 # Run the OS with QEMU
 run: all

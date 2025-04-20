@@ -1,5 +1,7 @@
 #include "include/stdint.h"
 #include "include/stddef.h"
+#include "include/stdarg.h"
+#include "include/stdio.h"
 #include "serial.h"
 #include "io.h"
 
@@ -41,4 +43,16 @@ void serial_write_char(char c) {
 void serial_write_string(const char* str) {
     for (size_t i = 0; str[i] != '\0'; i++)
         serial_write_char(str[i]);
+}
+
+/* Printf style function for serial output */
+void serial_printf(const char* format, ...) {
+    char buffer[256];
+    va_list args;
+    
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    
+    serial_write_string(buffer);
 } 

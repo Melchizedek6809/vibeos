@@ -16,7 +16,13 @@ void puts(const char* str) {
 int snprintf(char* buffer, size_t size, const char* format, ...) {
     va_list args;
     va_start(args, format);
-    
+    int result = vsnprintf(buffer, size, format, args);
+    va_end(args);
+    return result;
+}
+
+/* Format a string with va_list args and store it in the buffer */
+int vsnprintf(char* buffer, size_t size, const char* format, va_list args) {
     size_t count = 0;
     size_t i = 0;
     char temp_buf[64];  /* Temporary buffer for number conversions */
@@ -132,6 +138,5 @@ int snprintf(char* buffer, size_t size, const char* format, ...) {
         buffer[i < size ? i : size - 1] = '\0';
     }
     
-    va_end(args);
     return count;
 } 

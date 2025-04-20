@@ -3,6 +3,7 @@
 
 #include "include/stdint.h"
 #include "include/stddef.h"
+#include "include/stdarg.h"
 
 /* Text mode color constants */
 enum vga_color {
@@ -41,5 +42,8 @@ void terminal_putchar(char c);
 
 /* Write a string to the terminal */
 void terminal_write(const char* data);
+
+/* Printf style function for terminal output */
+void vga_printf(const char* format, ...);
 
 #endif /* VGA_H */ 

@@ -2,6 +2,7 @@
 #include "include/stddef.h"
 #include "include/stdio.h"
 #include "include/string.h"
+#include "include/idt.h"
 #include "kernel.h"
 #include "vga.h"
 #include "serial.h"
@@ -9,6 +10,24 @@
 
 /* Helper macro to check multiboot magic value */
 #define CHECK_MULTIBOOT_MAGIC(x) ((x) == MULTIBOOT_MAGIC)
+
+/* Handler for test interrupt */
+void test_interrupt_handler(registers_t* regs) {
+    char buffer[128];
+    snprintf(buffer, sizeof(buffer), "Custom handler for interrupt %d called\n", regs->int_no);
+    puts(buffer);
+}
+
+/* Trigger a test interrupt (Division by Zero) */
+void trigger_test_interrupt(void) {
+    /* Division by zero will trigger interrupt 0 */
+    int a = 10;
+    int b = 0;
+    int c = a / b;  /* This will cause a divide by zero exception */
+    
+    /* This line is here just to avoid compiler warnings */
+    snprintf((char*)&c, 1, "");
+}
 
 /* The kernel main function */
 void kernel_main(uint32_t multiboot_magic, uint32_t multiboot_addr) {
@@ -87,6 +106,25 @@ void kernel_main(uint32_t multiboot_magic, uint32_t multiboot_addr) {
     snprintf(buffer, sizeof(buffer), "memcmp result: %d\n", memcmp(mem1, mem2, 7));
     puts(buffer);
     
+    puts("================================\n");
+    
+    /* Set up interrupt handling */
+    puts("\n==== Setting up interrupt handling ====\n");
+    
+    /* Initialize the IDT */
+    idt_init();
+    
+    /* Register a custom handler for the divide by zero exception */
+    register_interrupt_handler(0, test_interrupt_handler);
+    
+    puts("Registered custom interrupt handler for divide by zero\n");
+    puts("Triggering a divide by zero exception...\n");
+    
+    /* Trigger a test interrupt (Division by Zero) */
+    trigger_test_interrupt();
+    
+    /* The code should continue here after handling the interrupt */
+    puts("Returned from interrupt handler\n");
     puts("================================\n");
     
     /* Adding a small delay and extra output to make sure we see everything */

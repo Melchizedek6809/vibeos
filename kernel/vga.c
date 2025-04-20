@@ -1,5 +1,7 @@
 #include "include/stdint.h"
 #include "include/stddef.h"
+#include "include/stdarg.h"
+#include "include/stdio.h"
 #include "vga.h"
 
 /* Hardware text mode color constants */
@@ -65,4 +67,16 @@ void terminal_putchar(char c) {
 void terminal_write(const char* data) {
     for (size_t i = 0; data[i] != '\0'; i++)
         terminal_putchar(data[i]);
+}
+
+/* Printf style function for terminal output */
+void vga_printf(const char* format, ...) {
+    char buffer[256];
+    va_list args;
+    
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    
+    terminal_write(buffer);
 } 
