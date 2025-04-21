@@ -20,6 +20,33 @@
 #define KEYBOARD_CMD_ENABLE_PORT1   0xAE
 #define KEYBOARD_CMD_TEST_PORT1     0xAB
 
+/* Keyboard status codes */
+typedef enum {
+    KEYBOARD_SUCCESS = 0,
+    KEYBOARD_ERROR_TIMEOUT = -1,
+    KEYBOARD_ERROR_INIT_FAILED = -2,
+    KEYBOARD_ERROR_SELF_TEST_FAILED = -3,
+    KEYBOARD_NO_DATA = -4
+} keyboard_status_t;
+
+/* Key states */
+typedef enum {
+    KEY_STATE_UP = 0,
+    KEY_STATE_DOWN = 1,
+    KEY_STATE_REPEAT = 2
+} key_state_t;
+
+/* Modifier key states */
+typedef struct {
+    uint8_t shift : 1;
+    uint8_t ctrl : 1;
+    uint8_t alt : 1;
+    uint8_t capslock : 1;
+    uint8_t numlock : 1;
+    uint8_t scrolllock : 1;
+    uint8_t reserved : 2;
+} keyboard_modifiers_t;
+
 /* Scancode set 1 (US QWERTY layout) */
 typedef enum {
     KEY_ERROR = 0,
@@ -49,20 +76,40 @@ typedef enum {
     KEY_SCROLLLOCK = 0x46
 } special_keys_t;
 
-/* Initialize the PS/2 keyboard */
-void keyboard_init(void);
+/* Initialize the PS/2 keyboard
+ * Returns: KEYBOARD_SUCCESS on success, error code otherwise
+ */
+keyboard_status_t keyboard_init(void);
 
-/* Wait for keyboard input buffer to be ready to read */
-void keyboard_wait_read(void);
+/* Wait for keyboard input buffer to be ready to read
+ * Returns: KEYBOARD_SUCCESS on success, KEYBOARD_ERROR_TIMEOUT on timeout
+ */
+keyboard_status_t keyboard_wait_read(void);
 
-/* Wait for keyboard input buffer to be ready to write */
-void keyboard_wait_write(void);
+/* Wait for keyboard input buffer to be ready to write
+ * Returns: KEYBOARD_SUCCESS on success, KEYBOARD_ERROR_TIMEOUT on timeout
+ */
+keyboard_status_t keyboard_wait_write(void);
 
-/* Process keyboard input and return the ASCII character, if any */
+/* Process keyboard input and return the ASCII character, if any
+ * Returns: ASCII character if available, 0 otherwise
+ */
 char keyboard_process_input(void);
 
-/* Convert a scancode to an ASCII character */
+/* Convert a scancode to an ASCII character
+ * Returns: ASCII character if valid scancode, 0 otherwise
+ */
 char keyboard_scancode_to_ascii(uint8_t scancode);
+
+/* Get current state of modifier keys
+ * Returns: Current modifier key states
+ */
+keyboard_modifiers_t keyboard_get_modifiers(void);
+
+/* Check if a specific key is currently pressed
+ * Returns: 1 if key is pressed, 0 otherwise
+ */
+int keyboard_is_key_pressed(uint8_t scancode);
 
 /* Keyboard interrupt handler */
 void keyboard_handler(registers_t* regs);
