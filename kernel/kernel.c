@@ -32,6 +32,9 @@ void print_logo(void) {
 
 /* The kernel main function */
 void kernel_main(uint32_t multiboot_magic, uint32_t multiboot_addr) {
+    /* Mark multiboot_addr as unused */
+    (void)multiboot_addr;
+    
     /* First thing: initialize terminal and serial for output */
     terminal_init();
     serial_init();

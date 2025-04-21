@@ -49,9 +49,9 @@ typedef struct {
 typedef void (*isr_handler_t)(registers_t*);
 
 /* Register a custom interrupt handler function */
-void register_interrupt_handler(uint8_t n, isr_handler_t handler);
+extern void register_interrupt_handler(uint8_t n, isr_handler_t handler);
 
 /* The main interrupt handler function */
-void isr_handler(registers_t regs);
+extern void isr_handler(registers_t regs);
 
 #endif /* IDT_H */ 

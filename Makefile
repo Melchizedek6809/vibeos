@@ -26,7 +26,7 @@ BUILD_DIR = build
 
 # Dynamically find source files
 C_SOURCES = $(shell find $(KERNEL_DIR) -name "*.c")
-ASM_SOURCES = $(shell find $(KERNEL_DIR) -name "*.c")
+ASM_SOURCES = $(shell find $(KERNEL_DIR) -name "*.S")
 
 # Object files
 C_OBJECTS = $(C_SOURCES:%.c=$(BUILD_DIR)/%.o)
