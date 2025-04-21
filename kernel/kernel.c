@@ -10,6 +10,7 @@
 #include "drivers/keyboard.h"
 
 #include "arch/x86/gdt.h"
+#include "arch/x86/paging.h"
 
 /* Helper macro to check multiboot magic value */
 #define CHECK_MULTIBOOT_MAGIC(x) ((x) == MULTIBOOT_MAGIC)
@@ -36,6 +37,9 @@ void print_logo(void) {
 void kernel_main(uint32_t multiboot_magic, uint32_t multiboot_addr) {
     /* Initialize the GDT first! */
     gdt_init();
+
+    /* Initialize Paging */
+    paging_init();
 
     /* Mark multiboot_addr as unused */
     (void)multiboot_addr;

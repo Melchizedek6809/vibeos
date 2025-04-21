@@ -37,3 +37,8 @@ This project serves as both a learning platform for OS fundamentals and an exper
 4. **File Systems**: Basic file operations and storage
 5. **User Space**: Applications and system calls
 6. **Networking**: Basic communication capabilities
+
+### Tools used
+- Assembly is always written in AT&T style and uses the GNU Assembler gas
+- Right now we only support GCC, clang support would be nice but it's not a priority
+- We only support building on Linux/Mac machines
