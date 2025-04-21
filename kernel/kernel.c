@@ -11,6 +11,7 @@
 
 #include "arch/x86/gdt.h"
 #include "arch/x86/paging.h"
+#include "drivers/pci.h"
 
 /* Helper macro to check multiboot magic value */
 #define CHECK_MULTIBOOT_MAGIC(x) ((x) == MULTIBOOT_MAGIC)
@@ -69,6 +70,9 @@ void kernel_main(uint32_t multiboot_magic, uint32_t multiboot_addr) {
     
     /* Initialize the PS/2 keyboard */
     keyboard_init();
+
+    /* Enumerate PCI devices */
+    pci_enumerate_bus();
     
     /* Enable interrupts so keyboard can generate events */
     asm volatile ("sti");
