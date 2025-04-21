@@ -22,21 +22,46 @@ void* memmove(void* dest, const void* src, size_t n);
 void* memset(void* s, int c, size_t n);
 int memcmp(const void* s1, const void* s2, size_t n);
 
-/* Integer to string conversion */
-int itoa(int32_t value, char* str, int base);
-int utoa(uint32_t value, char* str, int base);
+/* Integer to string conversion
+ * Returns the number of characters written to str (excluding null terminator)
+ * str must be large enough to hold the output string
+ * For itoa: minimum buffer size = 12 for 32-bit int in base 10 (sign + 10 digits + null)
+ * For utoa: minimum buffer size = 11 for 32-bit uint in base 10 (10 digits + null)
+ */
+size_t itoa(int32_t value, char* str, int base);
+size_t utoa(uint32_t value, char* str, int base);
 
 /* String manipulation helper */
 void reverse_str(char* start, char* end);
 
-/* String tokenization */
+/* String scanning functions
+ * strspn: Returns length of initial segment containing only chars from accept
+ * strcspn: Returns length of initial segment containing no chars from reject
+ */
+size_t strspn(const char* str, const char* accept);
+size_t strcspn(const char* str, const char* reject);
+
+/* String tokenization
+ * Breaks string into sequence of tokens using the delimiters
+ * First call should have str != NULL, subsequent calls should have str == NULL
+ * Returns NULL when no more tokens are found
+ * Note: modifies the original string by replacing delimiters with null bytes
+ */
 char* strtok(char* str, const char* delimiters);
 
-/* String search functions */
+/* String search functions
+ * Returns pointer to the found character or NULL if not found
+ * For strchr: first occurrence from start
+ * For strrchr: last occurrence from end
+ */
 char* strchr(const char* str, int c);
 char* strrchr(const char* str, int c);
 
-/* String to number conversion */
+/* String to number conversion
+ * Skips leading whitespace
+ * Handles optional +/- sign
+ * Stops at first non-digit character
+ */
 int atoi(const char* str);
 
 #endif /* _VIBEOS_STRING_H */ 

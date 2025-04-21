@@ -47,7 +47,7 @@ void kernel_main(uint32_t multiboot_magic, uint32_t multiboot_addr) {
     
     /* First thing: initialize terminal and serial for output */
     terminal_init();
-    serial_init();
+    serial_init(NULL);
     
     /* Display the VibeOS logo */
     print_logo();

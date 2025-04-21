@@ -6,6 +6,24 @@
 #include "../drivers/vga.h"
 #include "../drivers/serial.h"
 
+/* Helper function to apply padding */
+static void apply_padding(char* buffer, size_t* i, size_t* count, size_t max_chars, 
+                         size_t padding, char pad_char) {
+    for (size_t p = 0; p < padding && *i < max_chars; p++) {
+        buffer[(*i)++] = pad_char;
+        (*count)++;
+    }
+}
+
+/* Helper function to copy string with bounds checking */
+static void copy_str_bounded(char* buffer, size_t* i, size_t* count, size_t max_chars,
+                           const char* str, size_t len) {
+    for (size_t j = 0; j < len && *i < max_chars; j++) {
+        buffer[(*i)++] = str[j];
+        (*count)++;
+    }
+}
+
 /* Write a string to both terminal and serial outputs */
 void puts(const char* str) {
     terminal_write(str);
@@ -57,7 +75,7 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list args) {
             
             // Parse flags and width
             char pad_char = ' '; // Default padding character is space
-            int min_width = 0;
+            size_t min_width = 0;
             int is_zero_padded = 0;
 
             // Check for zero-padding flag
@@ -79,28 +97,20 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list args) {
                     const char* str = va_arg(args, const char*);
                     if (str == NULL) str = "(null)";
                     size_t str_len = strlen(str);
-                    int padding = min_width > str_len ? min_width - str_len : 0;
+                    size_t padding = min_width > str_len ? min_width - str_len : 0;
                     
                     // Apply space padding (left-aligned by default, no zero padding for strings)
-                    for (int p = 0; p < padding && i < max_chars; p++) {
-                        buffer[i++] = ' ';
-                        count++;
-                    }
-                    while (*str && i < max_chars) {
-                        buffer[i++] = *str++;
-                        count++;
-                    }
+                    apply_padding(buffer, &i, &count, max_chars, padding, ' ');
+                    copy_str_bounded(buffer, &i, &count, max_chars, str, str_len);
                     break;
                 }
                 
                 case 'c': {  /* Character */
                     char c = (char)va_arg(args, int);
-                    int padding = min_width > 1 ? min_width - 1 : 0;
+                    size_t padding = min_width > 1 ? min_width - 1 : 0;
+                    
                     // Apply space padding
-                    for (int p = 0; p < padding && i < max_chars; p++) {
-                        buffer[i++] = ' ';
-                        count++;
-                    }
+                    apply_padding(buffer, &i, &count, max_chars, padding, ' ');
                     if (i < max_chars) {
                         buffer[i++] = c;
                         count++;
@@ -111,8 +121,8 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list args) {
                 case 'd': 
                 case 'i': {  /* Signed integer */
                     int value = va_arg(args, int);
-                    int len = itoa(value, temp_buf, 10);
-                    int padding = min_width > len ? min_width - len : 0;
+                    size_t len = itoa(value, temp_buf, 10);
+                    size_t padding = min_width > len ? min_width - len : 0;
                     
                     // Handle sign for zero padding
                     if (value < 0 && is_zero_padded) {
@@ -121,15 +131,11 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list args) {
                     }
 
                     // Apply padding
-                    for (int p = 0; p < padding && i < max_chars; p++) {
-                        buffer[i++] = pad_char;
-                        count++;
-                    }
+                    apply_padding(buffer, &i, &count, max_chars, padding, pad_char);
+                    
                     // Copy number string
-                    for (int j = (value < 0 && is_zero_padded) ? 1 : 0; j < len && i < max_chars; j++) {
-                        buffer[i++] = temp_buf[j];
-                        count++;
-                    }
+                    size_t start_idx = (value < 0 && is_zero_padded) ? 1 : 0;
+                    copy_str_bounded(buffer, &i, &count, max_chars, temp_buf + start_idx, len - start_idx);
                     break;
                 }
                 
@@ -137,58 +143,38 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list args) {
                 case 'x': {  /* Unsigned integer and Hexadecimal (lowercase) */
                     unsigned int value = va_arg(args, unsigned int);
                     int base = (format[pos] == 'u') ? 10 : 16;
-                    int len = utoa(value, temp_buf, base);
-                    int padding = min_width > len ? min_width - len : 0;
+                    size_t len = utoa(value, temp_buf, base);
+                    size_t padding = min_width > len ? min_width - len : 0;
                     
-                     // Handle 0x prefix for %p or future %#x (manual for now based on pci.c example)
-                    int prefix_len = 0;
-                    // if (format[pos] == 'p' || (/* other conditions for # flag */)) { ... }
-                    
-                    // Apply padding (pad_char determined by '0' flag)
-                    for (int p = 0; p < padding && i < max_chars; p++) {
-                        buffer[i++] = pad_char;
-                        count++;
-                    }
-                     // Add prefix if needed (e.g. "0x" for pointers)
-                    // if (prefix_len > 0 && i < max_chars) { buffer[i++] = '0'; count++; } ...
+                    // Apply padding
+                    apply_padding(buffer, &i, &count, max_chars, padding, pad_char);
                     
                     // Copy number string
-                    for (int j = 0; j < len && i < max_chars; j++) {
-                        buffer[i++] = temp_buf[j];
-                        count++;
-                    }
+                    copy_str_bounded(buffer, &i, &count, max_chars, temp_buf, len);
                     break;
                 }
                                 
                 case 'p': {  /* Pointer */
                     void* ptr_val = va_arg(args, void*);
                     uint32_t value = (uint32_t)ptr_val;
-                    int len = utoa(value, temp_buf, 16);
-                    int prefix_len = 2; // "0x"
-                    // Pointers often have fixed width like 0x prefixed 8 hex digits
-                    // Forcing min_width=8+prefix_len and zero padding might be desired
-                    // min_width = (min_width > len + prefix_len) ? min_width : len + prefix_len;
+                    size_t len = utoa(value, temp_buf, 16);
+                    size_t prefix_len = 2; // "0x"
+                    
                     if (min_width < len + prefix_len) min_width = len + prefix_len; 
                     is_zero_padded = 1; // Pointers usually zero padded
                     pad_char = '0';
 
-                    int padding = min_width > (len + prefix_len) ? min_width - (len + prefix_len) : 0;
+                    size_t padding = min_width > (len + prefix_len) ? min_width - (len + prefix_len) : 0;
                     
                     // Output "0x" prefix first
                     if (i < max_chars) { buffer[i++] = '0'; count++; }
                     if (i < max_chars) { buffer[i++] = 'x'; count++; }
                     
                     // Apply zero padding BETWEEN prefix and number
-                    for (int p = 0; p < padding && i < max_chars; p++) {
-                        buffer[i++] = pad_char; 
-                        count++;
-                    }
+                    apply_padding(buffer, &i, &count, max_chars, padding, pad_char);
                     
                     // Copy number string
-                    for (int j = 0; j < len && i < max_chars; j++) {
-                        buffer[i++] = temp_buf[j];
-                        count++;
-                    }
+                    copy_str_bounded(buffer, &i, &count, max_chars, temp_buf, len);
                     break;
                 }
                 

@@ -1,24 +1,24 @@
 #include "../include/string.h"
 #include "../include/stdint.h"
+#include "../include/limits.h"
 
 /* String length functions */
 
 /* Calculate string length */
 size_t strlen(const char* str) {
-    size_t len = 0;
-    while (str[len] != '\0') {
-        len++;
-    }
-    return len;
+    const char* s = str;
+    while (*s) s++;
+    return s - str;
 }
 
 /* Calculate string length with maximum limit */
 size_t strnlen(const char* str, size_t maxlen) {
-    size_t len = 0;
-    while (len < maxlen && str[len] != '\0') {
-        len++;
+    const char* s = str;
+    while (maxlen > 0 && *s) {
+        s++;
+        maxlen--;
     }
-    return len;
+    return s - str;
 }
 
 /* String copy functions */
@@ -32,44 +32,55 @@ char* strcpy(char* dest, const char* src) {
 
 /* Copy string with length limit */
 char* strncpy(char* dest, const char* src, size_t n) {
+    char* original_dest = dest;
     size_t i;
-    
-    /* Copy up to n characters from src to dest */
+
+    /* Copy from src */
     for (i = 0; i < n && src[i] != '\0'; i++) {
         dest[i] = src[i];
     }
-    
-    /* Pad dest with null bytes if necessary */
+
+    /* Fill remainder with nulls */
     for (; i < n; i++) {
         dest[i] = '\0';
     }
-    
-    return dest;
+
+    return original_dest;
 }
 
 /* String comparison functions */
 
 /* Compare two strings */
 int strcmp(const char* s1, const char* s2) {
-    while (*s1 && (*s1 == *s2)) {
-        s1++;
-        s2++;
+    const unsigned char* p1 = (const unsigned char*)s1;
+    const unsigned char* p2 = (const unsigned char*)s2;
+    
+    while (*p1 && *p1 == *p2) {
+        p1++;
+        p2++;
     }
-    return *(unsigned char*)s1 - *(unsigned char*)s2;
+    return *p1 - *p2;
 }
 
 /* Compare two strings with length limit */
 int strncmp(const char* s1, const char* s2, size_t n) {
-    if (n == 0) {
-        return 0;
+    if (n == 0) return 0;
+
+    const unsigned char* p1 = (const unsigned char*)s1;
+    const unsigned char* p2 = (const unsigned char*)s2;
+
+    while (n > 0) {
+        if (*p1 != *p2) {
+            return *p1 - *p2;
+        }
+        if (*p1 == '\0') {
+            return 0;
+        }
+        p1++;
+        p2++;
+        n--;
     }
-    
-    while (n-- > 1 && *s1 && (*s1 == *s2)) {
-        s1++;
-        s2++;
-    }
-    
-    return *(unsigned char*)s1 - *(unsigned char*)s2;
+    return 0;
 }
 
 /* Memory functions */
@@ -79,9 +90,31 @@ void* memcpy(void* dest, const void* src, size_t n) {
     unsigned char* d = (unsigned char*)dest;
     const unsigned char* s = (const unsigned char*)src;
     
-    /* Simple byte-by-byte copy */
-    for (size_t i = 0; i < n; i++) {
-        d[i] = s[i];
+    /* Copy in chunks of size_t if possible */
+    size_t* dw;
+    const size_t* sw;
+    
+    /* Align to size_t boundary */
+    while (n && ((size_t)d & (sizeof(size_t)-1))) {
+        *d++ = *s++;
+        n--;
+    }
+    
+    /* Copy size_t chunks */
+    if (n >= sizeof(size_t)) {
+        dw = (size_t*)d;
+        sw = (const size_t*)s;
+        while (n >= sizeof(size_t)) {
+            *dw++ = *sw++;
+            n -= sizeof(size_t);
+        }
+        d = (unsigned char*)dw;
+        s = (const unsigned char*)sw;
+    }
+    
+    /* Copy remaining bytes */
+    while (n--) {
+        *d++ = *s++;
     }
     
     return dest;
@@ -98,8 +131,34 @@ void* memmove(void* dest, const void* src, size_t n) {
     }
     
     /* Otherwise, copy backward to handle overlapping regions */
-    for (size_t i = n; i > 0; i--) {
-        d[i-1] = s[i-1];
+    d += n;
+    s += n;
+    
+    /* Copy in chunks of size_t if possible */
+    size_t* dw;
+    const size_t* sw;
+    
+    /* Copy remaining bytes */
+    while (n && ((size_t)d & (sizeof(size_t)-1))) {
+        *--d = *--s;
+        n--;
+    }
+    
+    /* Copy size_t chunks */
+    if (n >= sizeof(size_t)) {
+        dw = (size_t*)d;
+        sw = (const size_t*)s;
+        while (n >= sizeof(size_t)) {
+            *--dw = *--sw;
+            n -= sizeof(size_t);
+        }
+        d = (unsigned char*)dw;
+        s = (const unsigned char*)sw;
+    }
+    
+    /* Copy remaining bytes */
+    while (n--) {
+        *--d = *--s;
     }
     
     return dest;
@@ -108,9 +167,39 @@ void* memmove(void* dest, const void* src, size_t n) {
 /* Fill memory with a constant byte */
 void* memset(void* s, int c, size_t n) {
     unsigned char* p = (unsigned char*)s;
+    unsigned char byte = (unsigned char)c;
     
-    for (size_t i = 0; i < n; i++) {
-        p[i] = (unsigned char)c;
+    /* Fill in chunks of size_t if possible */
+    size_t* pw;
+    size_t word;
+    
+    /* Create word-sized pattern */
+    word = byte;
+    word |= word << 8;
+    word |= word << 16;
+#if SIZE_MAX > 0xFFFFFFFF  /* Check if size_t is 64-bit */
+    word |= ((size_t)word) << 32;
+#endif
+    
+    /* Align to size_t boundary */
+    while (n && ((size_t)p & (sizeof(size_t)-1))) {
+        *p++ = byte;
+        n--;
+    }
+    
+    /* Fill size_t chunks */
+    if (n >= sizeof(size_t)) {
+        pw = (size_t*)p;
+        while (n >= sizeof(size_t)) {
+            *pw++ = word;
+            n -= sizeof(size_t);
+        }
+        p = (unsigned char*)pw;
+    }
+    
+    /* Fill remaining bytes */
+    while (n--) {
+        *p++ = byte;
     }
     
     return s;
@@ -121,10 +210,49 @@ int memcmp(const void* s1, const void* s2, size_t n) {
     const unsigned char* p1 = (const unsigned char*)s1;
     const unsigned char* p2 = (const unsigned char*)s2;
     
-    for (size_t i = 0; i < n; i++) {
-        if (p1[i] != p2[i]) {
-            return p1[i] - p2[i];
+    /* Compare in chunks of size_t if possible */
+    const size_t* w1;
+    const size_t* w2;
+    
+    /* Align to size_t boundary */
+    while (n && ((size_t)p1 & (sizeof(size_t)-1))) {
+        if (*p1 != *p2) {
+            return *p1 - *p2;
         }
+        p1++;
+        p2++;
+        n--;
+    }
+    
+    /* Compare size_t chunks */
+    if (n >= sizeof(size_t)) {
+        w1 = (const size_t*)p1;
+        w2 = (const size_t*)p2;
+        while (n >= sizeof(size_t)) {
+            if (*w1 != *w2) {
+                p1 = (const unsigned char*)w1;
+                p2 = (const unsigned char*)w2;
+                while (*p1 == *p2) {
+                    p1++;
+                    p2++;
+                }
+                return *p1 - *p2;
+            }
+            w1++;
+            w2++;
+            n -= sizeof(size_t);
+        }
+        p1 = (const unsigned char*)w1;
+        p2 = (const unsigned char*)w2;
+    }
+    
+    /* Compare remaining bytes */
+    while (n--) {
+        if (*p1 != *p2) {
+            return *p1 - *p2;
+        }
+        p1++;
+        p2++;
     }
     
     return 0;
@@ -132,19 +260,16 @@ int memcmp(const void* s1, const void* s2, size_t n) {
 
 /* Internal function to reverse a string in place */
 void reverse_str(char* start, char* end) {
-    char temp;
     while (start < end) {
-        temp = *start;
-        *start = *end;
-        *end = temp;
-        start++;
-        end--;
+        char temp = *start;
+        *start++ = *end;
+        *end-- = temp;
     }
 }
 
 /* Convert integer to string and return length */
-int itoa(int32_t value, char* str, int base) {
-    int i = 0;
+size_t itoa(int32_t value, char* str, int base) {
+    size_t i = 0;
     int is_negative = 0;
     
     /* Handle 0 explicitly */
@@ -181,8 +306,8 @@ int itoa(int32_t value, char* str, int base) {
 }
 
 /* Convert unsigned integer to string and return length */
-int utoa(uint32_t value, char* str, int base) {
-    int i = 0;
+size_t utoa(uint32_t value, char* str, int base) {
+    size_t i = 0;
     
     /* Handle 0 explicitly */
     if (value == 0) {
@@ -227,6 +352,11 @@ int atoi(const char* str) {
     
     /* Convert digits */
     while (*str >= '0' && *str <= '9') {
+        /* Check for overflow */
+        if (result > INT32_MAX / 10 || 
+            (result == INT32_MAX / 10 && (*str - '0') > INT32_MAX % 10)) {
+            return sign > 0 ? INT32_MAX : INT32_MIN;
+        }
         result = result * 10 + (*str - '0');
         str++;
     }
@@ -236,13 +366,97 @@ int atoi(const char* str) {
 
 /* Find the first occurrence of a character in a string */
 char* strchr(const char* str, int c) {
-    while (*str != '\0') {
-        if (*str == (char)c) {
-            return (char*)str;
-        }
-        str++;
-    }
+    const unsigned char ch = (unsigned char)c;
+    const unsigned char* s = (const unsigned char*)str;
     
-    /* Return NULL if we didn't find the character */
-    return NULL;
+    while (*s != ch) {
+        if (!*s) return NULL;
+        s++;
+    }
+    return (char*)s;
+}
+
+/* Find the last occurrence of a character in a string */
+char* strrchr(const char* str, int c) {
+    const unsigned char ch = (unsigned char)c;
+    const unsigned char* s = (const unsigned char*)str;
+    const unsigned char* last = NULL;
+    
+    while (*s) {
+        if (*s == ch) last = s;
+        s++;
+    }
+    if (*s == ch) last = s;  /* Check null terminator */
+    return (char*)last;
+}
+
+/* Static variable for strtok's state */
+static char* strtok_ptr = NULL;
+
+/* String tokenization */
+char* strtok(char* str, const char* delimiters) {
+    char* token_start;
+    char* token_end;
+
+    /* If str is NULL, continue with previous string */
+    if (!str) {
+        str = strtok_ptr;
+    }
+    if (!str) {
+        return NULL;
+    }
+
+    /* Skip leading delimiters */
+    str += strspn(str, delimiters);
+    if (*str == '\0') {
+        strtok_ptr = NULL;
+        return NULL;
+    }
+
+    /* Find end of token */
+    token_start = str;
+    token_end = str + strcspn(str, delimiters);
+    if (*token_end == '\0') {
+        strtok_ptr = NULL;
+    } else {
+        *token_end = '\0';
+        strtok_ptr = token_end + 1;
+    }
+
+    return token_start;
+}
+
+/* Helper function: get length of initial segment matching chars in accept */
+size_t strspn(const char* str, const char* accept) {
+    const char* s = str;
+    const char* a;
+
+    while (*s) {
+        for (a = accept; *a; a++) {
+            if (*s == *a) {
+                break;
+            }
+        }
+        if (!*a) {
+            break;
+        }
+        s++;
+    }
+    return s - str;
+}
+
+/* Helper function: get length of initial segment not matching chars in reject */
+size_t strcspn(const char* str, const char* reject) {
+    const char* s = str;
+    const char* r;
+
+    while (*s) {
+        for (r = reject; *r; r++) {
+            if (*s == *r) {
+                return s - str;
+            }
+        }
+        s++;
+    }
+    return s - str;
 } 
