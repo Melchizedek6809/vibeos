@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include <idt.h>
+#include "arch/x86/idt.h"
 #include "kernel.h"
 #include "drivers/vga.h"
 #include "drivers/serial.h"

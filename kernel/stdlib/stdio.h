@@ -1,9 +1,9 @@
 #ifndef _VIBEOS_STDIO_H
 #define _VIBEOS_STDIO_H
 
-#include "stddef.h"
-#include "stdint.h"
-#include "stdarg.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <stdarg.h>
 
 /* Write a string to both terminal and serial outputs */
 void puts(const char* str);

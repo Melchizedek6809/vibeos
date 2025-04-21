@@ -1,7 +1,7 @@
 #ifndef _VIBEOS_LIMITS_H
 #define _VIBEOS_LIMITS_H
 
-#include "stdint.h"
+#include <stdint.h>
 
 /* Integer limits */
 #define CHAR_BIT    8

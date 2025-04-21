@@ -1,7 +1,7 @@
 #ifndef KERNEL_PCI_H
 #define KERNEL_PCI_H
 
-#include "../stdint.h"
+#include "../stdlib/stdint.h"
 
 // PCI Configuration Space Access Ports (Mechanism 1)
 #define PCI_CONFIG_ADDRESS 0xCF8

@@ -1,7 +1,7 @@
 #ifndef KERNEL_GDT_H
 #define KERNEL_GDT_H
 
-#include "../../include/stdint.h"
+#include <stdint.h>
 
 // Structure for a GDT entry
 // Packed attribute prevents compiler padding

@@ -2,7 +2,7 @@
 #define KEYBOARD_H
 
 #include <stdint.h>
-#include "../include/idt.h"
+#include "../arch/x86/idt.h"
 
 /* PS/2 keyboard ports */
 #define KEYBOARD_DATA_PORT      0x60

@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "../arch/x86/io.h"
-#include "../include/idt.h"
+#include "../arch/x86/idt.h"
 
 /* PS/2 keyboard IRQ number */
 #define KEYBOARD_IRQ 1

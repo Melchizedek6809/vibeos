@@ -1,7 +1,7 @@
-#include "../include/drivers/pci.h"
-#include "../include/arch/x86/io.h"
-#include "../include/stdio.h" // For printf
-#include "../include/drivers/pci_db.h" // For human-readable names
+#include "pci.h"
+#include "../arch/x86/io.h"
+#include "../stdlib/stdio.h" // For printf
+#include "pci_db.h" // For human-readable names
 
 // Helper function to create the 32-bit address for CONFIG_ADDRESS
 static uint32_t pci_build_address(uint8_t bus, uint8_t device, uint8_t func, uint8_t offset) {

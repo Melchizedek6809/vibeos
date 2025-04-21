@@ -1,8 +1,8 @@
 #ifndef _VIBEOS_STRING_H
 #define _VIBEOS_STRING_H
 
-#include "stddef.h"
-#include "stdint.h"
+#include <stddef.h>
+#include <stdint.h>
 
 /* String length functions */
 size_t strlen(const char* str);

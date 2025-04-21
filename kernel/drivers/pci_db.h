@@ -1,8 +1,8 @@
 #ifndef KERNEL_PCI_DB_H
 #define KERNEL_PCI_DB_H
 
-#include "../stdint.h"
-#include "../stddef.h"  // For NULL definition
+#include "../stdlib/stdint.h"
+#include "../stdlib/stddef.h"  // For NULL definition
 
 /* Common PCI Vendor IDs */
 typedef struct {

@@ -6,7 +6,7 @@ QEMU = qemu-system-i386
 # Compiler and linker flags
 CFLAGS = -Wall -Wextra -O0 -g -ffreestanding -m32 \
          -fno-stack-protector -fno-pie -no-pie \
-         -nostdinc -Ikernel -Ikernel/include
+         -nostdinc -Ikernel/stdlib
 ASFLAGS = -m32 -nostdlib
 LDFLAGS = -m elf_i386 -T kernel/linker.ld -nostdlib
 

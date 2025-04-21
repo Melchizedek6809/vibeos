@@ -1,6 +1,6 @@
-#include "../include/string.h"
-#include "../include/stdint.h"
-#include "../include/limits.h"
+#include <string.h>
+#include <stdint.h>
+#include <limits.h>
 
 /* String length functions */
 

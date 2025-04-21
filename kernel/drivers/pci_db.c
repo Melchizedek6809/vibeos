@@ -1,4 +1,4 @@
-#include "../include/drivers/pci_db.h"
+#include "pci_db.h"
 
 const char* pci_vendor_name(uint16_t vendor_id) {
     for (const pci_vendor_info_t* vendor = pci_vendors; vendor->name != NULL; vendor++) {

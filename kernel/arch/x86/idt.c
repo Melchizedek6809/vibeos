@@ -1,8 +1,9 @@
-#include "../../include/idt.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
+
+#include "idt.h"
 #include "../../util.h"
 #include "io.h"
 #include "pic.h"

@@ -1,8 +1,8 @@
 #ifndef KERNEL_PAGING_H
 #define KERNEL_PAGING_H
 
-#include "../../include/stdint.h"
-#include "../../include/stddef.h" // For NULL
+#include <stdint.h>
+#include <stddef.h> // For NULL
 
 #define PAGE_SIZE 4096
 
