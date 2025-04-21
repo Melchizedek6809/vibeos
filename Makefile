@@ -22,84 +22,72 @@ QEMUFLAGS = -kernel build/kernel.bin \
 
 # Directories
 KERNEL_DIR = kernel
-INCLUDE_DIR = kernel/include
-DRIVERS_DIR = kernel/drivers
-ARCH_DIR = kernel/arch/x86
-STDLIB_DIR = kernel/stdlib
-MM_DIR = kernel/mm
 BUILD_DIR = build
 
-# Source files by category
-KERNEL_SOURCES = $(KERNEL_DIR)/kernel.c \
-                 $(KERNEL_DIR)/util.c
-
-ARCH_SOURCES = $(ARCH_DIR)/io.c \
-               $(ARCH_DIR)/idt.c \
-               $(ARCH_DIR)/isr.c \
-               $(ARCH_DIR)/pic.c
-
-DRIVER_SOURCES = $(DRIVERS_DIR)/vga.c \
-                 $(DRIVERS_DIR)/serial.c \
-                 $(DRIVERS_DIR)/keyboard.c
-
-STDLIB_SOURCES = $(STDLIB_DIR)/stdio.c \
-                 $(STDLIB_DIR)/string.c
-
-# Assembly sources
-ASM_SOURCES = $(ARCH_DIR)/boot.S \
-              $(ARCH_DIR)/interrupts.S
-
-# Combine all sources
-C_SOURCES = $(KERNEL_SOURCES) $(ARCH_SOURCES) $(DRIVER_SOURCES) $(STDLIB_SOURCES)
+# Dynamically find source files
+C_SOURCES = $(shell find $(KERNEL_DIR) -name "*.c")
+ASM_SOURCES = $(shell find $(KERNEL_DIR) -name "*.c")
 
 # Object files
-OBJECTS = $(C_SOURCES:%.c=$(BUILD_DIR)/%.o) \
-          $(ASM_SOURCES:%.S=$(BUILD_DIR)/%.o)
+C_OBJECTS = $(C_SOURCES:%.c=$(BUILD_DIR)/%.o)
+ASM_OBJECTS = $(ASM_SOURCES:%.S=$(BUILD_DIR)/%.o)
+OBJECTS = $(C_OBJECTS) $(ASM_OBJECTS)
+
+# Dependency files
+DEPS = $(C_OBJECTS:.o=.d)
 
 # Target files
 KERNEL = $(BUILD_DIR)/kernel.bin
 KERNEL_RAW = $(BUILD_DIR)/kernel.raw
 
-.PHONY: all clean run debug iso
+# Version info
+VERSION = 0.1.0
+BUILD_DATE = $(shell date +"%Y-%m-%d")
+
+.PHONY: all clean run debug iso help version info size sections
 
 all: prepare $(KERNEL)
+	@echo "Build complete!"
+
+# Include dependency files
+-include $(DEPS)
 
 # Prepare build environment
 prepare:
+	@echo "Preparing build directories..."
 	@mkdir -p $(BUILD_DIR)
-	@mkdir -p $(BUILD_DIR)/$(KERNEL_DIR)
-	@mkdir -p $(BUILD_DIR)/$(STDLIB_DIR)
-	@mkdir -p $(BUILD_DIR)/$(DRIVERS_DIR)
-	@mkdir -p $(BUILD_DIR)/$(ARCH_DIR)
+	@find $(KERNEL_DIR) -type d | sed "s|$(KERNEL_DIR)|$(BUILD_DIR)/$(KERNEL_DIR)|" | xargs -I{} mkdir -p {}
 
-# Compile C files
+# Compile C files with dependency generation
 $(BUILD_DIR)/%.o: %.c
 	@echo "Compiling $<"
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
 # Assemble assembly files
 $(BUILD_DIR)/%.o: %.S
 	@echo "Assembling $<"
 	@mkdir -p $(dir $@)
-	$(AS) $(ASFLAGS) -c $< -o $@
+	@$(AS) $(ASFLAGS) -c $< -o $@
 
 # Link the kernel
 $(KERNEL): $(OBJECTS)
-	@echo "Linking kernel"
-	$(LD) $(LDFLAGS) $(OBJECTS) -o $@
-	@echo "Creating a binary copy"
-	objcopy -O binary $(KERNEL) $(KERNEL_RAW)
+	@echo "Linking kernel..."
+	@$(LD) $(LDFLAGS) $(OBJECTS) -o $@
+	@echo "Creating binary copy..."
+	@objcopy -O binary $(KERNEL) $(KERNEL_RAW)
+	@echo "Kernel size: $$(stat -c %s $(KERNEL)) bytes"
 
 # Run the OS with QEMU
 run: all
 	@echo "Starting QEMU..."
-	$(QEMU) $(QEMUFLAGS)
+	@$(QEMU) $(QEMUFLAGS)
 
 # Debug with GDB
 debug: all
 	@echo "Starting QEMU with GDB..."
-	$(QEMU) $(QEMUFLAGS) -S -s
+	@echo "Connect with GDB using: target remote localhost:1234"
+	@$(QEMU) $(QEMUFLAGS) -S -s
 
 # Build an ISO image with GRUB (alternative)
 iso: all
@@ -108,7 +96,7 @@ iso: all
 	@cp $(KERNEL) $(BUILD_DIR)/iso/boot/
 	@echo "set timeout=0" > $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	@echo "set default=0" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
-	@echo "menuentry \"VibeOS\" {" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
+	@echo "menuentry \"VibeOS $(VERSION)\" {" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	@echo "  multiboot /boot/kernel.bin" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	@echo "  boot" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
 	@echo "}" >> $(BUILD_DIR)/iso/boot/grub/grub.cfg
@@ -118,9 +106,46 @@ iso: all
 # Run using ISO image
 run-iso: iso
 	@echo "Starting QEMU with ISO..."
-	$(QEMU) -cdrom $(BUILD_DIR)/vibeos.iso -serial stdio -no-reboot
+	@$(QEMU) -cdrom $(BUILD_DIR)/vibeos.iso -serial stdio -no-reboot
+
+# Print version information
+version:
+	@echo "VibeOS $(VERSION) ($(BUILD_DATE))"
+
+# Print build information
+info:
+	@echo "VibeOS Build Information:"
+	@echo "C Source Files: $(words $(C_SOURCES))"
+	@echo "ASM Source Files: $(words $(ASM_SOURCES))"
+	@echo "Total Objects: $(words $(OBJECTS))"
+	@echo "Compiler: $(shell $(CC) --version | head -n1)"
+	@echo "Build Date: $(BUILD_DATE)"
+
+# Show kernel size information
+size: $(KERNEL)
+	@echo "Kernel Size Information:"
+	@size $(KERNEL)
+
+# Show section information
+sections: $(KERNEL)
+	@echo "Kernel Section Information:"
+	@objdump -h $(KERNEL)
+
+# Print helpful information
+help:
+	@echo "VibeOS Makefile Help:"
+	@echo "make       - Build the kernel"
+	@echo "make run   - Build and run in QEMU"
+	@echo "make debug - Build and run with GDB debugging"
+	@echo "make iso   - Build bootable ISO image"
+	@echo "make run-iso - Build ISO and run in QEMU"
+	@echo "make clean - Remove build artifacts"
+	@echo "make info  - Show build information"
+	@echo "make size  - Show kernel size information"
+	@echo "make version - Show version information"
+	@echo "make help  - Show this help message"
 
 # Clean build files
 clean:
-	@echo "Cleaning build files"
+	@echo "Cleaning build files..."
 	@rm -rf $(BUILD_DIR) qemu.log 

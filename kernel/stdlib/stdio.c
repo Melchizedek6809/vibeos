@@ -1,8 +1,8 @@
 #include <stdarg.h>
-#include "../include/stddef.h"
-#include "../include/stdio.h"
-#include "../include/string.h"
-#include "../include/stdint.h"
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdint.h>
 #include "../drivers/vga.h"
 #include "../drivers/serial.h"
 

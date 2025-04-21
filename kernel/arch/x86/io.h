@@ -1,7 +1,7 @@
 #ifndef IO_H
 #define IO_H
 
-#include "../../include/stdint.h"
+#include <stdint.h>
 
 /* Read a byte from a port */
 uint8_t inb(uint16_t port);

@@ -1,6 +1,6 @@
 #include <stdint.h>
+#include <stdio.h>
 #include "../../include/idt.h"
-#include "../../include/stdio.h"
 #include "../../drivers/serial.h"
 #include "../../drivers/vga.h"
 #include "pic.h"

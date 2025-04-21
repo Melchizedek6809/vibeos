@@ -1,9 +1,9 @@
 #include "serial.h"
-#include "../include/stdint.h"
-#include "../include/stddef.h"
-#include "../include/stdarg.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include "../arch/x86/io.h"
-#include "include/stdio.h"
 
 /* Serial port I/O functions */
 #define COM1 0x3F8   /* COM1 port for serial output */

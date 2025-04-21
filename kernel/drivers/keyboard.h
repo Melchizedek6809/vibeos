@@ -1,7 +1,7 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
-#include "../include/stdint.h"
+#include <stdint.h>
 #include "../include/idt.h"
 
 /* PS/2 keyboard ports */

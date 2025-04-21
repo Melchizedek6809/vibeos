@@ -1,8 +1,8 @@
 #include "vga.h"
-#include "../include/stddef.h"
-#include "../include/stdint.h"
-#include "../include/string.h"
-#include "../include/stdio.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdio.h>
 #include "../arch/x86/io.h"
 
 /* Hardware text mode color constants */

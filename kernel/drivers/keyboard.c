@@ -1,6 +1,6 @@
 #include "keyboard.h"
-#include "../include/stdint.h"
-#include "../include/stdio.h"
+#include <stdint.h>
+#include <stdio.h>
 #include "../arch/x86/io.h"
 #include "../include/idt.h"
 

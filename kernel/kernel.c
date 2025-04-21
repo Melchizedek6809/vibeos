@@ -1,7 +1,7 @@
-#include "include/stdint.h"
-#include "include/stddef.h"
-#include "include/stdio.h"
-#include "include/string.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 #include "include/idt.h"
 #include "kernel.h"
 #include "drivers/vga.h"
@@ -15,17 +15,6 @@
 /* Handler for test interrupt */
 void test_interrupt_handler(registers_t* regs) {
     printf("Custom handler for interrupt %d called\n", regs->int_no);
-}
-
-/* Trigger a test interrupt (Division by Zero) */
-void trigger_test_interrupt(void) {
-    /* Division by zero will trigger interrupt 0 */
-    int a = 10;
-    int b = 0;
-    int c = a / b;  /* This will cause a divide by zero exception */
-    
-    /* This line is here just to avoid compiler warnings */
-    printf("%d", c);
 }
 
 /* ASCII art logo for VibeOS */
