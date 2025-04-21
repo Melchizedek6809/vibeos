@@ -1,37 +1,74 @@
-# VibeOS
+# VibeOS - LLM-Assisted OS Development
 
-A minimalist operating system kernel written in C.
+## Project Description
+VibeOS is an educational project aimed at building a small Unix-like operating system kernel with the assistance of LLM tools. The goal is to explore OS development concepts in a structured, modular way while leveraging AI assistance for implementation and problem-solving.
 
-## Overview
-
-VibeOS is a simple educational operating system kernel that demonstrates basic OS concepts:
-- Bootloader integration
-- Kernel initialization
-- Terminal output (VGA text mode)
-- Serial port communication
-- Basic I/O operations
-- Custom standard library implementation
+This project serves as both a learning platform for OS fundamentals and an experiment in LLM-assisted software development for complex low-level systems.
 
 ## Project Structure
 
 ```
-kernel/
-├── boot.S             # Multiboot-compliant assembly entry point
-├── kernel.c/h         # Main kernel code and entry point
-├── io.c/h             # I/O port operations
-├── serial.c/h         # Serial port communication
-├── vga.c/h            # VGA text mode display
-├── util.c/h           # Utility functions
-├── linker.ld          # Linker script for the kernel
-├── include/           # Custom standard headers
-│   ├── stdint.h       # Integer type definitions
-│   ├── stddef.h       # Common type definitions
-│   ├── stdarg.h       # Variable argument support
-│   ├── stdio.h        # Standard I/O definitions
-│   └── string.h       # String manipulation definitions
-└── stdlib/            # Standard library implementations
-    ├── stdio.c        # Standard I/O functionality
-    └── string.c       # String manipulation functions
+vibeos/
+├── kernel/              # Core kernel code
+│   ├── arch/            # Architecture-specific code
+│   │   └── x86/         # x86 architecture implementation
+│   ├── drivers/         # Hardware drivers
+│   ├── include/         # Header files and standard library headers
+│   ├── mm/              # Memory management
+│   └── stdlib/          # Custom standard library implementations
+├── build/               # Build output directory
+└── Makefile             # Build configuration
+```
+
+## General Guidelines
+
+### Development Approach
+- **Incremental Progress**: Build the system piece by piece, starting with the basics
+- **Learning-Focused**: Prioritize clear, well-commented code over optimization
+- **LLM Collaboration**: Use AI tools to help design, implement, and debug components
+- **Hands-On Learning**: Implement core OS concepts from scratch rather than using libraries
+
+### Architecture Guidelines
+- **32-bit x86**: Target the i386 architecture for simplicity and educational value
+- **Modular Design**: Separate functionality into cohesive, well-defined modules
+- **Unix Inspiration**: Follow Unix-like design principles where appropriate
+- **Self-Contained**: Implement custom versions of standard libraries rather than using existing ones
+
+### Code Style
+- **Clear Organization**: Maintain a consistent, logical file structure
+- **Descriptive Naming**: Use explicit names for functions, variables, and constants
+- **Comprehensive Comments**: Document the purpose of functions and complex logic
+- **Consistent Styling**: Follow established formatting patterns throughout the codebase
+
+### Implementation Priorities
+1. **Core Kernel**: Basic initialization, I/O, and terminal functionality
+2. **Memory Management**: Paging, allocation, and virtual memory
+3. **Process Management**: Task scheduling and execution
+4. **File Systems**: Basic file operations and storage
+5. **User Space**: Applications and system calls
+6. **Networking**: Basic communication capabilities
+
+## Building and Running
+
+### Requirements
+- GCC with i386 multilib support
+- NASM or GAS assembler
+- GNU Make
+- QEMU for emulation
+
+### Building
+```bash
+make
+```
+
+### Running
+```bash
+make run
+```
+
+### Debugging
+```bash
+make debug
 ```
 
 ## Features
@@ -42,52 +79,6 @@ kernel/
 - **Custom Standard Library**: Independent implementation of common C headers
 - **Formatted Output**: Support for formatted string output with snprintf
 - **String Utilities**: Complete suite of string and memory manipulation functions
-
-## Building
-
-The project uses a simple Makefile system:
-
-```bash
-# Clean and build the kernel
-make clean && make all
-
-# Run in QEMU
-make run
-
-# Run with GDB debugging support
-make debug
-
-# Build ISO image (requires GRUB tools)
-make iso
-```
-
-## Requirements
-
-- GCC cross-compiler for i386 targets
-- GNU Make
-- QEMU for testing
-- (Optional) GRUB tools for ISO creation
-
-## Implementation Details
-
-The kernel currently provides:
-
-- Basic terminal driver for text output using VGA mode
-- Serial port driver for debugging output
-- Helper functions for I/O port access
-- Minimal standard library implementation:
-  - String functions (strlen, strcpy, strcmp, etc.)
-  - Memory functions (memcpy, memmove, memset, etc.)
-  - Formatted output through snprintf
-
-## Future Improvements
-
-- Memory management
-- Interrupt handling
-- Process scheduling
-- File system support
-- User mode execution
-- Networking capabilities
 
 ## License
 

@@ -1,5 +1,6 @@
 #include "pic.h"
 #include "io.h"
+#include "../../include/stdint.h"
 
 /* Remap the PIC interrupt numbers to avoid conflicts with CPU exceptions */
 void pic_remap(uint8_t offset1, uint8_t offset2) {

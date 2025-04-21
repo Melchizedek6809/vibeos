@@ -1,10 +1,10 @@
-#include "../include/stdio.h"
+#include <stdarg.h>
 #include "../include/stddef.h"
-#include "../include/stdint.h"
-#include "../include/stdarg.h"
+#include "../include/stdio.h"
 #include "../include/string.h"
-#include "../vga.h"
-#include "../serial.h"
+#include "../include/stdint.h"
+#include "../drivers/vga.h"
+#include "../drivers/serial.h"
 
 /* Write a string to both terminal and serial outputs */
 void puts(const char* str) {

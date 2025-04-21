@@ -1,8 +1,8 @@
 #include <stdint.h>
-#include "include/idt.h"
-#include "include/stdio.h"
-#include "serial.h"
-#include "vga.h"
+#include "../../include/idt.h"
+#include "../../include/stdio.h"
+#include "../../drivers/serial.h"
+#include "../../drivers/vga.h"
 #include "pic.h"
 
 /* Array of function pointers to custom interrupt handlers */

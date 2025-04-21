@@ -1,9 +1,9 @@
 #ifndef VGA_H
 #define VGA_H
 
-#include "include/stdint.h"
-#include "include/stddef.h"
-#include "include/stdarg.h"
+#include "../include/stdint.h"
+#include "../include/stddef.h"
+#include "../include/stdarg.h"
 
 /* Text mode color constants */
 enum vga_color {

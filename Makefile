@@ -6,7 +6,7 @@ QEMU = qemu-system-i386
 # Compiler and linker flags
 CFLAGS = -Wall -Wextra -O0 -g -ffreestanding -m32 \
          -fno-stack-protector -fno-pie -no-pie \
-         -nostdinc -Ikernel/include
+         -nostdinc -Ikernel -Ikernel/include
 ASFLAGS = -m32 -nostdlib
 LDFLAGS = -m elf_i386 -T kernel/linker.ld -nostdlib
 
@@ -21,31 +21,40 @@ QEMUFLAGS = -kernel build/kernel.bin \
             -m 128M
 
 # Directories
-SRC_DIR = kernel
+KERNEL_DIR = kernel
+INCLUDE_DIR = kernel/include
+DRIVERS_DIR = kernel/drivers
+ARCH_DIR = kernel/arch/x86
 STDLIB_DIR = kernel/stdlib
+MM_DIR = kernel/mm
 BUILD_DIR = build
 
-# Source files
-C_SOURCES = $(SRC_DIR)/idt.c \
-            $(SRC_DIR)/io.c \
-            $(SRC_DIR)/isr.c \
-            $(SRC_DIR)/kernel.c \
-            $(SRC_DIR)/serial.c \
-            $(SRC_DIR)/util.c \
-            $(SRC_DIR)/vga.c \
-            $(SRC_DIR)/keyboard.c \
-            $(SRC_DIR)/pic.c
+# Source files by category
+KERNEL_SOURCES = $(KERNEL_DIR)/kernel.c \
+                 $(KERNEL_DIR)/util.c
+
+ARCH_SOURCES = $(ARCH_DIR)/io.c \
+               $(ARCH_DIR)/idt.c \
+               $(ARCH_DIR)/isr.c \
+               $(ARCH_DIR)/pic.c
+
+DRIVER_SOURCES = $(DRIVERS_DIR)/vga.c \
+                 $(DRIVERS_DIR)/serial.c \
+                 $(DRIVERS_DIR)/keyboard.c
 
 STDLIB_SOURCES = $(STDLIB_DIR)/stdio.c \
                  $(STDLIB_DIR)/string.c
 
-ASM_SOURCES = $(SRC_DIR)/boot.S \
-              $(SRC_DIR)/interrupts.S
+# Assembly sources
+ASM_SOURCES = $(ARCH_DIR)/boot.S \
+              $(ARCH_DIR)/interrupts.S
+
+# Combine all sources
+C_SOURCES = $(KERNEL_SOURCES) $(ARCH_SOURCES) $(DRIVER_SOURCES) $(STDLIB_SOURCES)
 
 # Object files
-OBJECTS = $(C_SOURCES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o) \
-          $(STDLIB_SOURCES:$(STDLIB_DIR)/%.c=$(BUILD_DIR)/stdlib_%.o) \
-          $(ASM_SOURCES:$(SRC_DIR)/%.S=$(BUILD_DIR)/%.o)
+OBJECTS = $(C_SOURCES:%.c=$(BUILD_DIR)/%.o) \
+          $(ASM_SOURCES:%.S=$(BUILD_DIR)/%.o)
 
 # Target files
 KERNEL = $(BUILD_DIR)/kernel.bin
@@ -58,20 +67,21 @@ all: prepare $(KERNEL)
 # Prepare build environment
 prepare:
 	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(BUILD_DIR)/$(KERNEL_DIR)
+	@mkdir -p $(BUILD_DIR)/$(STDLIB_DIR)
+	@mkdir -p $(BUILD_DIR)/$(DRIVERS_DIR)
+	@mkdir -p $(BUILD_DIR)/$(ARCH_DIR)
 
-# Compile C files from main kernel directory
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+# Compile C files
+$(BUILD_DIR)/%.o: %.c
 	@echo "Compiling $<"
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile C files from stdlib directory
-$(BUILD_DIR)/stdlib_%.o: $(STDLIB_DIR)/%.c
-	@echo "Compiling $<"
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Assemble assembly files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
+$(BUILD_DIR)/%.o: %.S
 	@echo "Assembling $<"
+	@mkdir -p $(dir $@)
 	$(AS) $(ASFLAGS) -c $< -o $@
 
 # Link the kernel

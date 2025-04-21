@@ -4,10 +4,10 @@
 #include "include/string.h"
 #include "include/idt.h"
 #include "kernel.h"
-#include "vga.h"
-#include "serial.h"
+#include "drivers/vga.h"
+#include "drivers/serial.h"
 #include "util.h"
-#include "keyboard.h"
+#include "drivers/keyboard.h"
 
 /* Helper macro to check multiboot magic value */
 #define CHECK_MULTIBOOT_MAGIC(x) ((x) == MULTIBOOT_MAGIC)
@@ -31,9 +31,9 @@ void trigger_test_interrupt(void) {
 /* ASCII art logo for VibeOS */
 void print_logo(void) {
     printf("\n");
-    printf(" \033[1;31m__      __\033[1;33m \033[1;33m_          \033[1;36m_____\033[1;34m  _____\033[0m\n");
-    printf(" \033[1;31m\\ \\    / /\033[1;33m(_)\033[1;32m        \033[1;36m/ ____|\033[1;34m/ ____|  \033[0m\n");
-    printf(" \033[1;31m \\ \\  / / \033[1;33m_ \033[1;32m __ ___ \033[1;36m| |  __\033[1;34m| (___  \033[0m\n");
+    printf(" \033[1;31m__      __\033[1;33m \033[1;33m_           \033[1;36m_____\033[1;34m  _____\033[0m\n");
+    printf(" \033[1;31m\\ \\    / /\033[1;33m(_)\033[1;32m         \033[1;36m/ ____|\033[1;34m/ ____|  \033[0m\n");
+    printf(" \033[1;31m \\ \\  / / \033[1;33m_ \033[1;32m __ ___  \033[1;36m| |  __\033[1;34m| (___  \033[0m\n");
     printf(" \033[1;31m  \\ \\/ / \033[1;33m| |\033[1;32m/ _ ` _ \\\033[1;36m| | |_ \\\033[1;34m\\___ \\ \033[0m\n");
     printf(" \033[1;31m   \\  /  \033[1;33m| |\033[1;32m  __/ |_)\033[1;36m| |__| |\033[1;34m____) |\033[0m\n");
     printf(" \033[1;31m    \\/   \033[1;33m|_|\033[1;32m\\___|_.__/\033[1;36m\\_____|\033[1;34m_____/ \033[0m\n");

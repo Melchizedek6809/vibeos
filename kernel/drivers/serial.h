@@ -1,8 +1,9 @@
 #ifndef SERIAL_H
 #define SERIAL_H
 
-#include "include/stdint.h"
-#include "include/stdarg.h"
+#include "../include/stdint.h"
+#include "../include/stddef.h"
+#include "../include/stdarg.h"
 
 /* Initialize the serial port */
 void serial_init(void);

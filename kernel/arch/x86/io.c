@@ -1,5 +1,5 @@
-#include "include/stdint.h"
 #include "io.h"
+#include "../../include/stdint.h"
 
 /* I/O port functions */
 uint8_t inb(uint16_t port) {

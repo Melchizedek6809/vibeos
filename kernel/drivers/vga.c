@@ -1,9 +1,9 @@
-#include "include/stdint.h"
-#include "include/stddef.h"
-#include "include/stdarg.h"
-#include "include/stdio.h"
-#include "include/string.h"
 #include "vga.h"
+#include "../include/stddef.h"
+#include "../include/stdint.h"
+#include "../include/string.h"
+#include "../include/stdio.h"
+#include "../arch/x86/io.h"
 
 /* Hardware text mode color constants */
 #define VGA_WIDTH 80

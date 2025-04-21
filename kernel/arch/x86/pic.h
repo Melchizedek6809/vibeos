@@ -1,7 +1,7 @@
 #ifndef PIC_H
 #define PIC_H
 
-#include "include/stdint.h"
+#include "../../include/stdint.h"
 
 /* PIC I/O ports */
 #define PIC1_COMMAND    0x20
