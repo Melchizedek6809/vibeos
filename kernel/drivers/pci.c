@@ -1,6 +1,7 @@
 #include "../include/drivers/pci.h"
 #include "../include/arch/x86/io.h"
 #include "../include/stdio.h" // For printf
+#include "../include/drivers/pci_db.h" // For human-readable names
 
 // Helper function to create the 32-bit address for CONFIG_ADDRESS
 static uint32_t pci_build_address(uint8_t bus, uint8_t device, uint8_t func, uint8_t offset) {
@@ -64,9 +65,9 @@ uint16_t pci_check_device(uint8_t bus, uint8_t device, uint8_t func) {
 
 // Enumerate the PCI bus(es)
 void pci_enumerate_bus() {
-    printf("\nPCS Bus Enumeration:\n");
-    printf(" Bus Dev Func Vendor Device Class Sub ProgIF Rev\n");
-    printf("----------------------------------------------------\n");
+    printf("\nPCI Bus Enumeration:\n");
+    printf("%-8s | %-12s | %-20s | %-20s\n", "Bus:Dev", "Vendor", "Device", "Class");
+    printf("-----------------------------------------------------------\n");
 
     // For simplicity, we'll only scan the first bus (bus 0) for now
     // A full implementation would scan buses 0-255
@@ -94,16 +95,25 @@ void pci_enumerate_bus() {
                 uint16_t device_id = pci_read_config_word(bus, device, func, PCI_DEVICE_ID_OFFSET);
                 uint8_t class_code = pci_read_config_byte(bus, device, func, PCI_CLASS_CODE_OFFSET);
                 uint8_t subclass_code = pci_read_config_byte(bus, device, func, PCI_SUBCLASS_CODE_OFFSET);
-                uint8_t prog_if = pci_read_config_byte(bus, device, func, PCI_PROG_IF_OFFSET);
-                uint8_t revision_id = pci_read_config_byte(bus, device, func, PCI_REVISION_ID_OFFSET);
 
-                // Print device information
-                printf(" %03d %03d %03d  0x%04x 0x%04x  0x%02x   0x%02x  0x%02x   0x%02x\n",
-                       bus, device, func, vendor_id, device_id,
-                       class_code, subclass_code, prog_if, revision_id);
+                // Get human-readable names
+                const char* vendor_name = pci_vendor_name(vendor_id);
+                const char* device_name = pci_device_name(vendor_id, device_id);
+                const char* class_name = pci_class_name(class_code, subclass_code);
+
+                // Format bus:device.function
+                char location[9];
+                snprintf(location, sizeof(location), "%02x:%02x.%x", bus, device, func);
+
+                // Print device information with names
+                printf("%-8s| %-12s | %-24s | %-20s\n",
+                       location,
+                       vendor_name,
+                       device_name,
+                       class_name);
             }
         }
     }
-     printf("----------------------------------------------------\n");
-     printf("PCI Enumeration Complete.\n");
+    printf("-----------------------------------------------------------\n");
+    printf("PCI Enumeration Complete.\n");
 } 

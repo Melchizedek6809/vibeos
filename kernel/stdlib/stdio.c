@@ -77,9 +77,16 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list args) {
             char pad_char = ' '; // Default padding character is space
             size_t min_width = 0;
             int is_zero_padded = 0;
+            int is_left_aligned = 0;
 
-            // Check for zero-padding flag
-            if (format[pos] == '0') {
+            // Check for left alignment flag
+            if (format[pos] == '-') {
+                is_left_aligned = 1;
+                pos++;
+            }
+
+            // Check for zero-padding flag (only if not left-aligned)
+            if (!is_left_aligned && format[pos] == '0') {
                 is_zero_padded = 1;
                 pad_char = '0';
                 pos++;
@@ -99,9 +106,15 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list args) {
                     size_t str_len = strlen(str);
                     size_t padding = min_width > str_len ? min_width - str_len : 0;
                     
-                    // Apply space padding (left-aligned by default, no zero padding for strings)
-                    apply_padding(buffer, &i, &count, max_chars, padding, ' ');
-                    copy_str_bounded(buffer, &i, &count, max_chars, str, str_len);
+                    // For left alignment, print string first then padding
+                    if (is_left_aligned) {
+                        copy_str_bounded(buffer, &i, &count, max_chars, str, str_len);
+                        apply_padding(buffer, &i, &count, max_chars, padding, ' ');
+                    } else {
+                        // Right alignment (default)
+                        apply_padding(buffer, &i, &count, max_chars, padding, ' ');
+                        copy_str_bounded(buffer, &i, &count, max_chars, str, str_len);
+                    }
                     break;
                 }
                 
@@ -109,33 +122,41 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list args) {
                     char c = (char)va_arg(args, int);
                     size_t padding = min_width > 1 ? min_width - 1 : 0;
                     
-                    // Apply space padding
-                    apply_padding(buffer, &i, &count, max_chars, padding, ' ');
-                    if (i < max_chars) {
-                        buffer[i++] = c;
-                        count++;
+                    if (is_left_aligned) {
+                        if (i < max_chars) {
+                            buffer[i++] = c;
+                            count++;
+                        }
+                        apply_padding(buffer, &i, &count, max_chars, padding, ' ');
+                    } else {
+                        apply_padding(buffer, &i, &count, max_chars, padding, ' ');
+                        if (i < max_chars) {
+                            buffer[i++] = c;
+                            count++;
+                        }
                     }
                     break;
                 }
                 
-                case 'd': 
+                case 'd':
                 case 'i': {  /* Signed integer */
                     int value = va_arg(args, int);
                     size_t len = itoa(value, temp_buf, 10);
                     size_t padding = min_width > len ? min_width - len : 0;
                     
-                    // Handle sign for zero padding
-                    if (value < 0 && is_zero_padded) {
-                        if (i < max_chars) buffer[i++] = '-';
-                        temp_buf[0] = '0'; // Remove sign from temp_buf for padding logic
+                    if (is_left_aligned) {
+                        copy_str_bounded(buffer, &i, &count, max_chars, temp_buf, len);
+                        apply_padding(buffer, &i, &count, max_chars, padding, ' ');
+                    } else {
+                        // Handle sign for zero padding
+                        if (value < 0 && is_zero_padded) {
+                            if (i < max_chars) buffer[i++] = '-';
+                            temp_buf[0] = '0'; // Remove sign from temp_buf for padding logic
+                        }
+                        apply_padding(buffer, &i, &count, max_chars, padding, pad_char);
+                        size_t start_idx = (value < 0 && is_zero_padded) ? 1 : 0;
+                        copy_str_bounded(buffer, &i, &count, max_chars, temp_buf + start_idx, len - start_idx);
                     }
-
-                    // Apply padding
-                    apply_padding(buffer, &i, &count, max_chars, padding, pad_char);
-                    
-                    // Copy number string
-                    size_t start_idx = (value < 0 && is_zero_padded) ? 1 : 0;
-                    copy_str_bounded(buffer, &i, &count, max_chars, temp_buf + start_idx, len - start_idx);
                     break;
                 }
                 
@@ -146,11 +167,13 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list args) {
                     size_t len = utoa(value, temp_buf, base);
                     size_t padding = min_width > len ? min_width - len : 0;
                     
-                    // Apply padding
-                    apply_padding(buffer, &i, &count, max_chars, padding, pad_char);
-                    
-                    // Copy number string
-                    copy_str_bounded(buffer, &i, &count, max_chars, temp_buf, len);
+                    if (is_left_aligned) {
+                        copy_str_bounded(buffer, &i, &count, max_chars, temp_buf, len);
+                        apply_padding(buffer, &i, &count, max_chars, padding, ' ');
+                    } else {
+                        apply_padding(buffer, &i, &count, max_chars, padding, pad_char);
+                        copy_str_bounded(buffer, &i, &count, max_chars, temp_buf, len);
+                    }
                     break;
                 }
                                 
@@ -161,20 +184,23 @@ int vsnprintf(char* buffer, size_t size, const char* format, va_list args) {
                     size_t prefix_len = 2; // "0x"
                     
                     if (min_width < len + prefix_len) min_width = len + prefix_len; 
-                    is_zero_padded = 1; // Pointers usually zero padded
-                    pad_char = '0';
-
                     size_t padding = min_width > (len + prefix_len) ? min_width - (len + prefix_len) : 0;
                     
-                    // Output "0x" prefix first
-                    if (i < max_chars) { buffer[i++] = '0'; count++; }
-                    if (i < max_chars) { buffer[i++] = 'x'; count++; }
-                    
-                    // Apply zero padding BETWEEN prefix and number
-                    apply_padding(buffer, &i, &count, max_chars, padding, pad_char);
-                    
-                    // Copy number string
-                    copy_str_bounded(buffer, &i, &count, max_chars, temp_buf, len);
+                    if (is_left_aligned) {
+                        // Output "0x" prefix first
+                        if (i < max_chars) { buffer[i++] = '0'; count++; }
+                        if (i < max_chars) { buffer[i++] = 'x'; count++; }
+                        copy_str_bounded(buffer, &i, &count, max_chars, temp_buf, len);
+                        apply_padding(buffer, &i, &count, max_chars, padding, ' ');
+                    } else {
+                        is_zero_padded = 1; // Pointers usually zero padded
+                        pad_char = '0';
+                        // Output "0x" prefix first
+                        if (i < max_chars) { buffer[i++] = '0'; count++; }
+                        if (i < max_chars) { buffer[i++] = 'x'; count++; }
+                        apply_padding(buffer, &i, &count, max_chars, padding, pad_char);
+                        copy_str_bounded(buffer, &i, &count, max_chars, temp_buf, len);
+                    }
                     break;
                 }
                 
