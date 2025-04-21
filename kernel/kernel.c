@@ -2,12 +2,14 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "include/idt.h"
+#include <idt.h>
 #include "kernel.h"
 #include "drivers/vga.h"
 #include "drivers/serial.h"
 #include "util.h"
 #include "drivers/keyboard.h"
+
+#include "arch/x86/gdt.h"
 
 /* Helper macro to check multiboot magic value */
 #define CHECK_MULTIBOOT_MAGIC(x) ((x) == MULTIBOOT_MAGIC)
@@ -32,6 +34,9 @@ void print_logo(void) {
 
 /* The kernel main function */
 void kernel_main(uint32_t multiboot_magic, uint32_t multiboot_addr) {
+    /* Initialize the GDT first! */
+    gdt_init();
+
     /* Mark multiboot_addr as unused */
     (void)multiboot_addr;
     
